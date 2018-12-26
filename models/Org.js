@@ -15,6 +15,11 @@ const OrgSchema = new Schema({
         ref: 'users',
         default: undefined
     },
+    admins:{
+        type : [Schema.Types.ObjectId],
+        ref : 'users',
+        default: undefined
+    },
     events:{
         type: [Schema.Types.ObjectId],
         ref: 'events',
