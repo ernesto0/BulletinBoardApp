@@ -48,9 +48,50 @@ router.post('/', passport.authenticate('jwt', {session: false}), (req, res) =>{
         });
     
         newEvent.save().then(event => res.json(event));
-
+l
     })
-    
+        
+});
+
+//@route    GET     api/events/
+//@desc     Get     events
+//@access   Public 
+router.get('/', (req, res) => {
+    Event.find()
+    .sort({startTime: 1})
+    .then(events => res.json(events))
+    .catch(err => res.status(404).json({nopostsfound : 'No posts found'}));
+});
+
+//@route    GET     api/events/:id
+//@desc     Get event by id
+//@access   Public 
+router.get('/:id', (req, res) => {
+    Event.findById(req.params.id)
+    .then(events => res.json(events))
+    .catch(err => res.status(404).json({nopostfound: 'No post found with given ID'}));
+});
+
+//@route    POST    api/events/edit
+//@desc     Edit event. In order to edit an event the user must be an org admin
+//@access   Private 
+
+//@route    Delete    api/events/:id
+//@desc     Delete event. In order to delete an event the user must be an org admin
+//@access   Private
+router.delete('/:id', passport.authenticate('jwt', {session: false}), (req, res) => {
+    Event.findOne({user: req.user.id})
+    .then(event => {
+        Event.findById(req.params.id)
+        .then(post => {
+            if(event.user.toString() !== req.user.id) {
+                return res.status(401).json({ notauthorized: 'User not authorized'})
+            }
+
+            event.remove().then(() => res.json({ success: true}));
+        })
+        .catch(err => res.status(404).json({eventNotFound: 'No event found'}))
+    })
 });
 
 module.exports = router;
