@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const passport = require('passport');
+mongoose.set('useFindAndModify', false);
 
 //Event model
 const Event = require('../../models/Event');
@@ -44,13 +45,32 @@ router.post('/', passport.authenticate('jwt', {session: false}), (req, res) =>{
             //add event time
             desc : req.body.desc,
             org : req.body.org,
-            user: req.user.id
+            user: req.user.id,
+            name: req.body.name
         });
     
         newEvent.save().then(event => res.json(event));
-l
+
     })
         
+});
+
+//@route    POST    api/events/edit
+//@desc     Edit  event. In order to edit an event the user must be an org admin
+//@access   Private 
+router.post('/edit', passport.authenticate('jwt', {session: false}), (req, res) =>{
+    const errors = {};
+    //check if org exists & user is an admin of the event's org
+    Event.findById(req.body.id)
+    .then(event =>{
+        console.log(event);
+        const newEvent = {
+            name : req.body.name,
+            desc : req.body.desc,
+        };
+        event.updateOne(newEvent).then(res.json(newEvent));
+    })
+    .catch(err => res.status(404).json({eventNotFound: 'No event found with given ID'}));
 });
 
 //@route    GET     api/events/
@@ -83,7 +103,7 @@ router.delete('/:id', passport.authenticate('jwt', {session: false}), (req, res)
     Event.findOne({user: req.user.id})
     .then(event => {
         Event.findById(req.params.id)
-        .then(post => {
+        .then((post) => {
             if(event.user.toString() !== req.user.id) {
                 return res.status(401).json({ notauthorized: 'User not authorized'})
             }

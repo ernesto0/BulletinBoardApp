@@ -1,6 +1,6 @@
 #to do 
-- [] Create edit org route
-- [] Create edit event route
+- [x] Create edit org route
+- [x] Create edit event route
 - [] Create add admin to org route
 - [] Create rsvp to event route
 - [] Create join org route

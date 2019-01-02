@@ -10,6 +10,10 @@ const EventSchema = new Schema ({
         type: Date,
         default: Date.now
     },
+    name: {
+        type: String,
+        required: true
+    },
     desc: {
         type: String,
         required: true
