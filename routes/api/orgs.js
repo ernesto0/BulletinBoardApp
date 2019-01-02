@@ -39,6 +39,40 @@ router.post('/', passport.authenticate('jwt', {session: false}), (req, res) =>{
     })
 });
 
+//@route    POST    api/orgs/edit
+//@desc     Edit existing org.
+//@access   Private 
+router.post('/edit', passport.authenticate('jwt', {session: false}), (req, res) =>{
+    const {errors, isValid} = validateOrgInput(req.body);
+
+    //Check input validation
+    if(!isValid){
+        return res.status(400).json(errors);
+    }
+
+    // //Check if org already exists.
+    // Org.findOneAndUpdate(
+    //     {"name": req.body.name},
+    //     {$set: {"name" : req.body.newName, 
+    //             "desc": req.body.desc}}).then(org => res.json(org));
+    
+    Org.findOne({name: req.body.name})
+    .then(org =>{
+        if(org){
+            console.log(org);
+            const newOrg = {
+                name : req.body.newName,
+                desc : req.body.desc,
+            };
+            org.updateOne(newOrg).then(res.json({Success: 'Organization update successful'}));
+        }
+        else{
+            errors.org = 'You cannot edit an organization that does not exist';
+            return res.json(errors);
+        }
+    });
+    
+});
 
 //@route    GET     api/orgs/
 //@desc     Get     orgs
