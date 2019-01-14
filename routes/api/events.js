@@ -18,12 +18,13 @@ router.get('/test', (req, res) => res.json({msg: "profile works"}));
 //@desc     Create  event. In order to create an event the user must be an org admin
 //@access   Private 
 router.post('/', passport.authenticate('jwt', {session: false}), (req, res) =>{
-    const {errors, isValid} = validateEventInput(req.body);
+    // const {errors, isValid} = validateEventInput(req.body);
     
-    //Check input validation
-    if(!isValid){
-        return res.status(400).json(errors);
-    }
+    
+    // Check input validation
+    // if(!isValid){
+    //     return res.status(400).json(errors);
+    // }
 
     //check if org exists & user is an admin of the event's org
     Org.findOne({name: req.body.org})
@@ -73,6 +74,20 @@ router.post('/edit', passport.authenticate('jwt', {session: false}), (req, res) 
     .catch(err => res.status(404).json({eventNotFound: 'No event found with given ID'}));
 });
 
+//@route    POST    api/events/rsvp
+//@desc     Add user to attendees array of an event
+//@body     eventID
+//@access   PRIVATE
+router.post('/rsvp', passport.authenticate('jwt',{ session: false}), (req, res) => {
+    const errors = {};
+    Event.findById(req.body.eventID)
+    .then(event => {
+        event.attendees.push(req.user.id);
+        return res.json(event);
+    })
+    .catch(err => res.status(404).json({eventNotFound: 'Event not found'}));
+});
+
 //@route    GET     api/events/
 //@desc     Get     events
 //@access   Public 
@@ -81,6 +96,15 @@ router.get('/', (req, res) => {
     .sort({startTime: 1})
     .then(events => res.json(events))
     .catch(err => res.status(404).json({nopostsfound : 'No posts found'}));
+});
+
+//@route    GET     api/events/:org
+//@desc     Get event by org
+//@access   Public 
+router.get('/:org', (req, res) => {
+    Event.find({name: req.params.org})
+    .then(events => res.json(events))
+    .catch(err => res.status(404).json({nopostfound: 'No events'}));
 });
 
 //@route    GET     api/events/:id

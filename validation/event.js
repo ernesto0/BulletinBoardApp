@@ -7,6 +7,7 @@ module.exports = function validateLoginInput(data, auth){
     data.startTime = !isEmpty(data.startTime) ? data.startTime: '';
     data.desc = !isEmpty(data.desc) ? data.desc: '';
     data.org = !isEmpty(data.org) ? data.org: '';
+    data.name = !isEmpty(data.name) ? data.name: '';
 
 
     // if(Validator.isEmpty(data.startTime)){

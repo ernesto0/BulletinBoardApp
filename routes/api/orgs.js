@@ -27,7 +27,8 @@ router.post('/', passport.authenticate('jwt', {session: false}), (req, res) =>{
             const newOrg = new Org({
                 name : req.body.name,
                 desc : req.body.desc,
-                admins : req.user.id
+                admins : req.user.id,
+                members: req.user.id
             })
 
             newOrg.save().then(org1 => res.json(org1));
@@ -74,11 +75,13 @@ router.post('/edit', passport.authenticate('jwt', {session: false}), (req, res) 
     
 });
 
-//@route    POST    api/orgs
-//@desc     Create  org.
-//@access   Private 
+//@route    POST    api/orgs/admin
+//@desc     Authorize user as admin for org. 
+//@body     org name / user id of new admin 
+//@access   Private. Must be an admin to grant admin privlieges to other users
 router.post('/admin', passport.authenticate('jwt', {session: false}), (req, res) =>{
     // const {errors, isValid} = validateOrgInput(req.body);
+    const errors = {};
 
     // //Check input validation
     // if(!isValid){
@@ -86,19 +89,30 @@ router.post('/admin', passport.authenticate('jwt', {session: false}), (req, res)
     // }
 
     //Check if org already exists.
-    Org.findOne({name: req.body.org})
+    Org.findOneAndUpdate({name: req.body.name, admins: req.user.id}, {$push : {admins: req.body.id}})
     .then(org =>{
-        if(!org){
-            const newOrg = new Org({
-                name : req.body.name,
-                desc : req.body.desc,
-                admins : req.user.id
-            })
-
-            newOrg.save().then(org1 => res.json(org1));
+        if(org){
+            return res.json(org);
         }
         else{
-            errors.org = 'Organization already exists';
+            errors.org = 'Organization does not exist or user is not authorized to add admins';
+            return res.json(errors);
+        }
+    })
+});
+
+//@route    POST    api/orgs/join
+//@desc     Add user to org member array
+//@body     orgID
+//@access   Private. Must be an admin to grant admin privlieges to other users
+router.post('/join', passport.authenticate('jwt', {session: false}), (req, res) =>{
+    Org.findByIdAndUpdate(req.body.orgID, {$push : {members: req.user.id}})
+    .then(org =>{
+        if(org){
+            return res.json(org);
+        }
+        else{
+            errors.org = 'Organization does not exist';
             return res.json(errors);
         }
     })
@@ -113,6 +127,7 @@ router.get('/', (req, res) => {
     .then(orgs => res.json(orgs))
     .catch(err => res.status(404).json({noOrgsFound : 'No organizations found'}));
 });
+
 
 //@route    GET     api/orgs/:id
 //@desc     Get org by id
