@@ -10,21 +10,25 @@ const OrgSchema = new Schema({
         type: String,
         required: true,
     },
-    members:{
-        type: [Schema.Types.ObjectId], 
-        ref: 'users',
-        default: undefined
-    },
-    admins:{
-        type : [Schema.Types.ObjectId],
-        ref : 'users',
-        default: undefined
-    },
-    events:{
-        type: [Schema.Types.ObjectId],
-        ref: 'events',
-        default: undefined
-    },
+    members:[
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'users'
+        }
+    ],
+    admins:[
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'users'
+        }
+    ],
+    events:[
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'events',
+            default: undefined
+        }
+    ],
     contact:{
         type: String,
         required: false

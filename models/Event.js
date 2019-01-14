@@ -18,11 +18,15 @@ const EventSchema = new Schema ({
         type: String,
         required: true
     },
-    attendees: {
-        type: [Schema.Types.ObjectId],
-        ref: 'users',
-        default: undefined
+    image: {
+        img: { data: Buffer, contentType: String}
     },
+    attendees: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'users',
+        }
+    ],
     org: {
         type: String,
         required: true

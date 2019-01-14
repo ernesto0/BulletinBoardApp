@@ -74,6 +74,36 @@ router.post('/edit', passport.authenticate('jwt', {session: false}), (req, res) 
     
 });
 
+//@route    POST    api/orgs
+//@desc     Create  org.
+//@access   Private 
+router.post('/admin', passport.authenticate('jwt', {session: false}), (req, res) =>{
+    // const {errors, isValid} = validateOrgInput(req.body);
+
+    // //Check input validation
+    // if(!isValid){
+    //     return res.status(400).json(errors);
+    // }
+
+    //Check if org already exists.
+    Org.findOne({name: req.body.org})
+    .then(org =>{
+        if(!org){
+            const newOrg = new Org({
+                name : req.body.name,
+                desc : req.body.desc,
+                admins : req.user.id
+            })
+
+            newOrg.save().then(org1 => res.json(org1));
+        }
+        else{
+            errors.org = 'Organization already exists';
+            return res.json(errors);
+        }
+    })
+});
+
 //@route    GET     api/orgs/
 //@desc     Get     orgs
 //@access   Public 
