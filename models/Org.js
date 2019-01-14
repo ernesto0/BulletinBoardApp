@@ -10,6 +10,9 @@ const OrgSchema = new Schema({
         type: String,
         required: true,
     },
+    image: {
+        img: { data: Buffer, contentType: String}
+    },
     members:[
         {
             type: Schema.Types.ObjectId,
